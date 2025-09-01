@@ -15,32 +15,53 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  email String @unique
-  hash String
+  email      String   @unique
+  hash       String
 
-  firstName String?
-  lastName String?
-  bookmarks Bookmark[]
+  firstName  String?
+  lastName   String?
+
+  // Relación: un usuario tiene muchos libros
+  books      Book[]
 
   @@map("users")
 }
 
-model Bookmark{
-    id Int @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Book { 
+  id          Int      @id @default(autoincrement()) 
+  createdAt   DateTime @default(now()) 
+  updatedAt   DateTime @updatedAt
 
-    title String
-    description String?
-    link String
+  title       String 
+  author      String 
+  description String?
 
-    userId Int
-    user User @relation(fields: [userId], references:[id])
+  // Relación con User (1:N)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
 
-    @@map("bookmarks")
+  // Relación 1:1 con Bookmark
+  bookmark    Bookmark?
 
+  @@map("books")
+}
+
+model Bookmark {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  title       String
+  description String?
+  link        String
+
+  // Relación 1:1 con Book
+  bookId      Int  @unique
+  book        Book @relation(fields: [bookId], references: [id])
+
+  @@map("bookmarks")
 }
