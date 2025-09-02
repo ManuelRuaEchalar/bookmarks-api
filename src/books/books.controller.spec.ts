@@ -1,18 +1,36 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BooksController } from './books.controller';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { BooksService } from './books.service';
+import { CreateBookDto } from './dto/create-book.dto';
+import { JwtGuard } from '../auth/guard';
+import { GetUser } from 'src/auth/decorator';
 
-describe('BooksController', () => {
-  let controller: BooksController;
+@UseGuards(JwtGuard)
+@Controller('books')
+export class BooksController {
+  constructor(private readonly booksService: BooksService) {}
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [BooksController],
-    }).compile();
+  @Get()
+  findAll(@GetUser('id') userId: number) {
+    return this.booksService.findAll(userId);
+  }
 
-    controller = module.get<BooksController>(BooksController);
-  });
+  @Get(':id')
+  findOne(@Param('id') id: string, @GetUser('id') userId: number) {
+    return this.booksService.getBookById(+id, userId);
+  }
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+  @Post()
+  create(@GetUser('id') userId: number, @Body() createBookDto: CreateBookDto) {
+    return this.booksService.create(userId, createBookDto);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateBookDto: CreateBookDto, @GetUser('id') userId: number) {
+    return this.booksService.update(+id, updateBookDto, userId);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @GetUser('id') userId: number) {
+    return this.booksService.remove(+id, userId);
+  }
+}

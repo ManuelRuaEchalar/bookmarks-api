@@ -10,14 +10,14 @@ export class BooksController {
  constructor(private readonly booksService: BooksService) {}
 
 @Get()
- findAll() {
- return this.booksService.findAll();
- }
+findAll(@GetUser('id') userId: number) {
+  return this.booksService.findAll(userId);
+}
 
 @Get(':id')
- findOne(@Param('id') id: string) {
- return this.booksService.getBookById(+id);
- }
+findOne(@Param('id') id: string, @GetUser('id') userId: number) {
+  return this.booksService.getBookById(+id, userId);
+}
 
 @Post()
  create(
@@ -26,14 +26,14 @@ export class BooksController {
  return this.booksService.create(userId, createBookDto);
  }
 
-@Put(':id')
- update(@Param('id') id: string, @Body() updateBookDto: CreateBookDto) {
- return this.booksService.update(+id, updateBookDto);
- }
+ @Put(':id')
+update(@Param('id') id: string, @Body() updateBookDto: CreateBookDto, @GetUser('id') userId: number) {
+  return this.booksService.update(+id, updateBookDto, userId);
+}
 
 @Delete(':id')
- remove(@Param('id') id: string) {
- return this.booksService.remove(+id);
- }
+remove(@Param('id') id: string, @GetUser('id') userId: number) {
+  return this.booksService.remove(+id, userId);
+}
 
 }

@@ -4,61 +4,58 @@ import { CreateBookDto } from './dto/create-book.dto';
 
 @Injectable()
 export class BooksService {
- constructor(private prisma: PrismaService) {}
- private books = [];
+  constructor(private prisma: PrismaService) {}
 
-findAll() {
- return this.books;
- }
-
-getBookById(id: number) {
-    return this.prisma.book.findFirst({
-      where: {
-        id: id,
-        //userId,
-      },
+  async findAll(userId?: number) {
+    return this.prisma.book.findMany({
+      where: userId ? { userId } : {}, // Optionally filter by userId
     });
-}
+  }
 
-async create(userId: number, createBookDto: CreateBookDto) {
- const book =
-      await this.prisma.book.create({
-        data: {
-          userId,
-          ...createBookDto,
-        },
-      });
-    return book;
-}
-
-update(id: number, updateBookDto: CreateBookDto) {
- const book = this.getBookById(id);
- if (book) {
- Object.assign(book, updateBookDto);
- return book;
- }
- return null;
- }
-
-async remove(id: number) {
-    const book =
-      await this.prisma.book.findUnique({
-        where: {
-          id: id,
-        },
-      });
-
-    // check if user owns the bookmark
-    //if (!book || book. !== userId)
-      //throw new ForbiddenException(
-        //'Access to resources denied',
-      //);
-
-    await this.prisma.book.delete({
+  async getBookById(id: number, userId?: number) {
+    return this.prisma.book.findUnique({
       where: {
-        id: id,
+        id,
+        ...(userId && { userId }), // Optionally filter by userId
       },
     });
   }
 
+  async create(userId: number, createBookDto: CreateBookDto) {
+    return this.prisma.book.create({
+      data: {
+        userId,
+        ...createBookDto,
+      },
+    });
+  }
+
+  async update(id: number, updateBookDto: CreateBookDto, userId?: number) {
+    return this.prisma.book.update({
+      where: {
+        id,
+        ...(userId && { userId }), // Optionally filter by userId
+      },
+      data: updateBookDto,
+    });
+  }
+
+  async remove(id: number, userId?: number) {
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id,
+        ...(userId && { userId }), // Optionally filter by userId
+      },
+    });
+
+    if (!book) {
+      throw new Error('Book not found or access denied');
+    }
+
+    await this.prisma.book.delete({
+      where: { id },
+    });
+
+    return book;
+  }
 }
