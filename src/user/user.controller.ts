@@ -1,8 +1,10 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
+// Cambia esta línea temporalmente para ver qué exporta
+import { PrismaClient } from '@prisma/client';
+// import type { User } from '@prisma/client'; // Comenta esta línea
+
 import { GetUser } from '../auth/decorator';
 import { JwtGuard } from '../auth/guard';
-
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
 
@@ -10,8 +12,9 @@ import { UserService } from './user.service';
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
+  
   @Get('me')
-  getMe(@GetUser() user: User) {
+  getMe(@GetUser() user: any) { // Cambia User por any temporalmente
     return user;
   }
 
