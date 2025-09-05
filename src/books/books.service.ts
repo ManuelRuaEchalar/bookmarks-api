@@ -41,21 +41,30 @@ export class BooksService {
   }
 
   async remove(id: number, userId?: number) {
-    const book = await this.prisma.book.findUnique({
-      where: {
-        id,
-        ...(userId && { userId }), // Optionally filter by userId
-      },
+  const book = await this.prisma.book.findUnique({
+    where: {
+      id,
+      ...(userId && { userId }), // Optionally filter by userId
+    },
+  });
+
+  if (!book) {
+    throw new Error('Book not found or access denied');
+  }
+
+  // Usar transacción para eliminar bookmarks y libro
+  return this.prisma.$transaction(async (prisma) => {
+    // Eliminar todos los bookmarks asociados
+    await prisma.bookmark.deleteMany({
+      where: { bookId: id },
     });
 
-    if (!book) {
-      throw new Error('Book not found or access denied');
-    }
-
-    await this.prisma.book.delete({
+    // Eliminar el libro
+    await prisma.book.delete({
       where: { id },
     });
 
     return book;
-  }
+  });
+}
 }
