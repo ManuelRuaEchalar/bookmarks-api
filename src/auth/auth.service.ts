@@ -4,6 +4,7 @@ import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { first } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +16,15 @@ export class AuthService {
             const user = await this.prisma.user.create({
                 data: {
                     email: dto.email,
+                    firstName: dto.firstName,
+                    lastName: dto.lastName,
                     hash,
                 },
                 select: {
                     id: true,
                     email: true,
+                    firstName: true,
+                    lastName: true,
                     createdAt: true,
                 }
             });
